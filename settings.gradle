@@ -1,0 +1,2 @@
+rootProject.name = "Price_report_16"
+include ':app'
