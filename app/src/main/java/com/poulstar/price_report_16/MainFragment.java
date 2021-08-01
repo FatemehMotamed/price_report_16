@@ -3,10 +3,25 @@ package com.poulstar.price_report_16;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import com.poulstar.price_report_16.api.CurrencyExchange;
+import com.poulstar.price_report_16.models.MainResponse;
+
+import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.moshi.MoshiConverterFactory;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +29,9 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class MainFragment extends Fragment {
+
+    ArrayList<Item> array_item;
+    RecyclerView main_recycle;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,9 +77,38 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        array_item = new ArrayList<>();
 
-        
+        Retrofit retrofit = new Retrofit.Builder().
+                baseUrl("https://cdn.jsdelivr.net/").
+                addConverterFactory(MoshiConverterFactory.create()).
+                build();
+        CurrencyExchange currency_exchange= retrofit.create(CurrencyExchange.class);
 
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        Call<MainResponse> currency_model = currency_exchange.get_currency("2020-11-29", "usd");
+
+        currency_model.enqueue(new Callback<MainResponse>() {
+            @Override
+            public void onResponse(Call<MainResponse> call, Response<MainResponse> response) {
+                Log.d("ressssss", response.body().toString());
+            }
+
+            @Override
+            public void onFailure(Call<MainResponse> call, Throwable t) {
+
+            }
+        });
+
+
+        main_recycle = view.findViewById(R.id.main_recycle);
+        MainAdapter adapter = new MainAdapter(array_item, getContext());
+        main_recycle.setAdapter(adapter);
+
+        LinearLayoutManager manager =new LinearLayoutManager(getContext());
+        main_recycle.setLayoutManager(manager);
+
+
+        return view;
     }
 }
